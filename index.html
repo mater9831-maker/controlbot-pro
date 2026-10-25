@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f1f5f9" id="themeMeta">
+<title>ريموت البوتات</title>
+<style>
+:root,[data-theme=dark]{--bg:#0b1220;--card:#131c2e;--card2:#18233a;--line:#243049;--tx:#e8edf6;--mut:#8b9ab5;--pri:#3b82f6;--ok:#22c55e;--okbg:rgba(34,197,94,.14);--bad:#ef4444;--badbg:rgba(239,68,68,.14);--warn:#f59e0b;--warnbg:rgba(245,158,11,.14);--okt:#86efac;--badt:#fca5a5;--warnt:#fcd34d;--post:#4ade80;--negt:#f87171;--ont:#bfdbfe;--onbg:rgba(59,130,246,.2);--shadow:rgba(0,0,0,.45)}
+[data-theme=light]{--bg:#f1f5f9;--card:#ffffff;--card2:#f1f5f9;--line:#e2e8f0;--tx:#0f172a;--mut:#64748b;--pri:#2563eb;--okbg:rgba(34,197,94,.14);--badbg:rgba(239,68,68,.12);--warnbg:rgba(245,158,11,.16);--okt:#15803d;--badt:#b91c1c;--warnt:#b45309;--post:#15803d;--negt:#dc2626;--ont:#1d4ed8;--onbg:rgba(37,99,235,.12);--shadow:rgba(15,23,42,.18)}
+[data-theme=mint]{--bg:#ecfdf5;--card:#ffffff;--card2:#f0fdf4;--line:#cdeedd;--tx:#052e16;--mut:#4b7a63;--pri:#059669;--okbg:rgba(34,197,94,.16);--badbg:rgba(239,68,68,.12);--warnbg:rgba(245,158,11,.16);--okt:#15803d;--badt:#b91c1c;--warnt:#b45309;--post:#15803d;--negt:#dc2626;--ont:#047857;--onbg:rgba(5,150,105,.14);--shadow:rgba(5,46,22,.2)}
+[data-theme=sand]{--bg:#fbf5e6;--card:#fffdf7;--card2:#f7efdc;--line:#eadfc6;--tx:#3b2f1a;--mut:#8a7a5c;--pri:#b45309;--okbg:rgba(34,197,94,.16);--badbg:rgba(239,68,68,.12);--warnbg:rgba(245,158,11,.18);--okt:#15803d;--badt:#b91c1c;--warnt:#b45309;--post:#15803d;--negt:#dc2626;--ont:#92400e;--onbg:rgba(180,83,9,.13);--shadow:rgba(59,47,26,.2)}
+:root{--ok:#22c55e;--bad:#ef4444;--warn:#f59e0b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Segoe UI",Tahoma,system-ui,sans-serif;padding:16px;max-width:600px;margin:auto;line-height:1.5;transition:background .25s,color .25s}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
+.brand{font-size:18px;font-weight:700}
+.tr{display:flex;align-items:center;gap:10px}
+.clock{font-size:12px;color:var(--mut);text-align:end}
+.clock b{display:block;color:var(--tx);font-size:14px;font-weight:600;direction:ltr}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.h{font-size:13px;color:var(--mut);margin:0 0 10px;font-weight:600}
+.plat.run{border-color:rgba(34,197,94,.45);background:linear-gradient(160deg,var(--okbg),var(--card) 55%)}
+.plat.stop{border-color:rgba(239,68,68,.5);background:linear-gradient(160deg,var(--badbg),var(--card) 55%)}
+.plat.off{opacity:.85}
+.ttl{font-size:17px;font-weight:700}
+.state{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;margin-top:10px}
+.dot{width:11px;height:11px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px var(--okbg);flex:none}
+.stop .dot{background:var(--bad);box-shadow:0 0 0 4px var(--badbg)}
+.off .dot{background:#94a3b8;box-shadow:0 0 0 4px rgba(148,163,184,.22)}
+.sub{color:var(--mut);font-size:13px;margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;padding:3px 10px;border-radius:99px;border:1px solid var(--line);background:var(--card2);color:var(--mut)}
+.chip.ok{color:var(--okt);background:var(--okbg);border-color:transparent}
+.chip.bad{color:var(--badt);background:var(--badbg);border-color:transparent}
+.chip.warn{color:var(--warnt);background:var(--warnbg);border-color:transparent}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.stat{background:var(--card2);border-radius:12px;padding:10px 6px;text-align:center}
+.stat span{display:block;font-size:11px;color:var(--mut)}
+.stat b{display:block;font-size:14px;margin-top:2px;direction:ltr}
+.pos{color:var(--post)}.neg{color:var(--negt)}
+button{font-family:inherit;border:0;border-radius:12px;padding:11px 16px;font-size:14px;font-weight:600;cursor:pointer;color:#fff;background:var(--pri)}
+button:active{transform:scale(.98)}
+button.red{background:var(--bad)}button.green{background:#16a34a}
+button.ghost{background:var(--card2);color:var(--tx);border:1px solid var(--line)}
+button.sm{padding:6px 12px;font-size:12px;border-radius:9px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:14px}
+.seg button{background:var(--card2);color:var(--mut);border:1px solid var(--line);font-size:12px;padding:9px 6px}
+.seg button.on{background:var(--onbg);color:var(--ont);border-color:var(--pri)}
+.hint{font-size:11px;color:var(--mut);margin-top:6px;line-height:1.6}
+.bot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;background:var(--card2);border-radius:12px;margin-top:6px}
+.bot .n{font-weight:600;font-size:13px}
+.bot .m{font-size:11px;color:var(--mut)}
+.bot .pl{font-weight:700;direction:ltr;font-size:14px}
+.edit{background:none;border:0;color:var(--mut);padding:0 4px;font-size:11px;font-weight:400;cursor:pointer;text-decoration:underline}
+.sec{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.sec .lb{font-size:12px;color:var(--mut);font-weight:600;margin-bottom:4px}
+.empty{font-size:13px;color:var(--mut);text-align:center;padding:8px 0}
+.sch{padding:10px 0;border-top:1px solid var(--line)}
+.sch:first-of-type{border-top:0}
+.sch .t{font-weight:600;font-size:14px}
+.sch .d{font-size:12px;color:var(--mut);margin:2px 0 8px}
+.sch .btns{display:flex;gap:8px}
+label{display:block;font-size:12px;color:var(--mut);margin:12px 0 6px}
+input,select{width:100%;padding:11px;border-radius:11px;border:1px solid var(--line);background:var(--card2);color:var(--tx);font-size:15px;font-family:inherit}
+input:focus,select:focus{outline:2px solid var(--pri);outline-offset:0}
+.grid{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:8px}
+.pre{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 2px}
+.pick{display:flex;flex-wrap:wrap;gap:8px}
+.pick button{background:var(--card2);color:var(--mut);border:1px solid var(--line);padding:7px 14px;font-size:13px;border-radius:99px}
+.pick button.on{background:var(--onbg);color:var(--ont);border-color:var(--pri)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.25);vertical-align:-1px;margin-inline-end:6px}
+.pv{background:var(--card2);border-radius:12px;padding:10px 12px;font-size:13px;margin-top:14px}
+.pv small{color:var(--mut);display:block;font-size:11px}
+.err{color:var(--badt);font-size:12px;margin-top:8px;min-height:16px}
+.foot{text-align:center;margin:6px 0 20px}
+.foot a{color:var(--mut);font-size:12px}
+.gsum{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.gear{padding:7px 11px;font-size:16px;line-height:1}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+/* modal + toast (messages appear at the top) */
+.mback{position:fixed;inset:0;background:var(--shadow);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:none;align-items:flex-start;justify-content:center;padding:10vh 16px 0;z-index:50}
+.mback.show{display:flex}
+.mbox{width:100%;max-width:380px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 24px 60px var(--shadow);animation:drop .2s ease-out}
+@keyframes drop{from{transform:translateY(-18px);opacity:0}to{transform:none;opacity:1}}
+.mt{font-weight:700;font-size:16px;margin-bottom:14px}
+.mbtns{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.toast{position:fixed;top:14px;left:50%;transform:translate(-50%,-110px);background:var(--card);border:1px solid var(--line);color:var(--tx);padding:11px 20px;border-radius:14px;box-shadow:0 12px 30px var(--shadow);z-index:60;font-size:14px;font-weight:600;transition:transform .28s;max-width:90%;text-align:center}
+.toast.show{transform:translate(-50%,0)}
+.toast.ok{border-color:var(--ok);color:var(--okt)}
+.toast.bad{border-color:var(--bad);color:var(--badt)}
+
+/* ---- layout: sidebar + content ---- */
+body{max-width:none;margin:0;padding:0}
+.topbar{position:sticky;top:0;z-index:30;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.tl{display:flex;align-items:center;gap:10px}
+.burger{display:none;padding:7px 12px;font-size:18px;line-height:1}
+.login{max-width:420px;margin:24px auto}
+.wrap{display:flex;align-items:flex-start}
+.side{width:290px;flex:none;background:var(--card);border-inline-end:1px solid var(--line);padding:12px;overflow:auto;position:sticky;top:57px;height:calc(100vh - 57px)}
+.content{flex:1;min-width:0;padding:16px;max-width:820px;margin-inline:auto}
+.scrim{display:none}
+.sq{margin-bottom:10px}
+.acc{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;margin-bottom:2px}
+.acc:hover{background:var(--card2)}
+.acc.on{background:var(--onbg)}
+.acc .nm{font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acc .sb{font-size:11px;color:var(--mut);direction:ltr;text-align:start}
+.acc .pl{margin-inline-start:auto;font-size:12px;font-weight:700;direction:ltr;flex:none}
+.acc .mid{min-width:0}
+.sdot{width:10px;height:10px;border-radius:50%;flex:none;background:#94a3b8}
+.s-run{background:var(--ok)}.s-stop{background:var(--bad)}
+.sl{font-size:11px;color:var(--mut);font-weight:700;margin:14px 6px 6px}
+.big{font-size:18px;font-weight:700}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin:0 0 14px}
+.tabs button{background:var(--card);color:var(--mut);border:1px solid var(--line);padding:9px 16px;font-size:13px;border-radius:99px;white-space:nowrap}
+.tabs button.on{background:var(--onbg);color:var(--ont);border-color:var(--pri)}
+.trd{background:var(--card2);border-radius:12px;padding:10px 12px;margin-top:8px}
+.trd .m{font-size:11px;color:var(--mut);margin-top:2px}
+.trd .pl{font-weight:700;direction:ltr;font-size:15px}
+.rep{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
+.it{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.it span:first-child{color:var(--mut)}
+.it b{direction:ltr;text-align:end}
+.link{cursor:pointer}
+@media(max-width:899px){
+  .burger{display:inline-flex}
+  .side{position:fixed;top:0;bottom:0;height:auto;inset-inline-start:0;width:290px;max-width:85vw;z-index:45;transform:translateX(-105%);transition:transform .25s;box-shadow:0 0 40px var(--shadow)}
+  html[dir=rtl] .side{transform:translateX(105%)}
+  .side.open{transform:none !important}
+  .scrim.show{display:block;position:fixed;inset:0;background:var(--shadow);z-index:40}
+  .rep{grid-template-columns:1fr}
+  .content{padding:12px}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="tl"><button class="ghost burger" id="burger" aria-label="menu">&#9776;</button><div class="brand" data-i18n="brand">ريموت البوتات</div></div>
+  <div class="tr"><div class="clock"><span data-i18n="cairo_now">القاهرة الان</span><b id="clock">--:--</b></div><button class="ghost gear" id="gear" aria-label="settings">&#9881;</button></div>
+</div>
+
+<div class="card login" id="setup" style="display:none">
+  <p class="h" data-i18n="login"></p>
+  <label style="margin-top:0" data-i18n="key_label"></label>
+  <input id="skey" dir="ltr" data-i18n-ph="key_ph" autocomplete="off">
+  <div class="row" style="margin-top:14px"><span class="err" id="serr"></span><button id="saveCfg" data-i18n="enter"></button></div>
+</div>
+
+<div class="wrap" id="main" style="display:none">
+  <aside class="side" id="side">
+    <input id="sq" class="sq" data-i18n-ph="search_acc" autocomplete="off">
+    <div id="sideList"></div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <section class="content">
+    <div id="dyn"></div>
+
+    <div id="formWrap">
+      <div class="card">
+        <p class="h" data-i18n="new_sched"></p>
+        <label style="margin-top:0" data-i18n="which"></label>
+        <div class="pick" id="pick"></div>
+        <label data-i18n="name_opt"></label>
+        <input id="name" data-i18n-ph="name_ph">
+
+        <div class="pre">
+          <button class="ghost sm" data-p="1h" data-i18n="p1h"></button>
+          <button class="ghost sm" data-p="4h" data-i18n="p4h"></button>
+          <button class="ghost sm" data-p="tom" data-i18n="ptom"></button>
+          <button class="ghost sm" data-p="wk" data-i18n="pwk"></button>
+        </div>
+
+        <label data-i18n="from"></label>
+        <div class="grid"><input type="date" id="fd"><select id="fh"></select><select id="fm"></select></div>
+        <label data-i18n="to"></label>
+        <div class="grid"><input type="date" id="td"><select id="th"></select><select id="tm"></select></div>
+
+        <div class="pv" id="pv"></div>
+        <button id="addBtn" style="width:100%;margin-top:14px" data-i18n="save_period"></button>
+      </div>
+
+      <div class="card">
+        <p class="h" data-i18n="add_title"></p>
+        <div class="hint" style="font-size:12px" data-i18n="add_text"></div>
+      </div>
+      <div class="foot"><a href="#" id="reset" data-i18n="change_key"></a></div>
+    </div>
+  </section>
+</div>
+
+<div class="mback" id="modal"><div class="mbox"><div class="mt" id="mTitle"></div><div id="mBody"></div><div class="mbtns" id="mBtns"></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+
+const $ = id => document.getElementById(id);
+const DB = "https://botcontrolcenter-789fd-default-rtdb.firebaseio.com";
+let KEY = localStorage.getItem("skey") || "";
+let P = {};                       // pid -> {manual, mode, list, hb, names, label}
+const sel = new Set(), seen = new Set();
+
+function el(tag, cls, txt){ const e = document.createElement(tag); if(cls) e.className = cls; if(txt != null) e.textContent = txt; return e; }
+
+/* ---------- languages ---------- */
+const I18N = {
+ar:{brand:"ريموت البوتات",cairo_now:"القاهرة الان",login:"تسجيل الدخول",key_label:"المفتاح السري (نفس SecretKey في البوت)",key_ph:"16 حرف على الاقل",enter:"دخول",
+key_err:"المفتاح 16 حرف على الاقل (حروف وارقام فقط)",platforms_n:"{n} منصة",none_yet:"لسه مفيش منصات",none_hint:"ركّب ControlBot على اول منصة وهتظهر هنا",
+g_sub:"{on} شغالة · {st} موقوفة · {off} مش متصلة",stop_all:"ايقاف الكل",run_all:"تشغيل الكل",confirm_stop_all:"ايقاف كل المنصات؟",
+rename:"تسمية",rename_platform:"اسم المنصة",rename_bot:"اسم البوت",online:"متصل",offline:"مش متصل",at_on:"AutoTrading شغال",at_off:"AutoTrading مقفول",at_unknown:"AutoTrading ؟",
+s_offline:"المنصة مش متصلة",s_guard:"حارس شغال (منع دخول جديد)",s_stopped:"موقوفة",s_running:"شغالة",reason:"السبب: {r}",resumes:" — ترجع {t}",next_stop:"اقرب ايقاف: {n} — {t}",no_next:"مفيش فترة ايقاف جاية",
+em_reason:"ايقاف طوارئ",balance:"الرصيد",equity:"Equity",floating:"الربح العائم",mode_a:"ايقاف كامل (AutoTrading)",mode_g:"حارس: منع الدخول الجديد",
+hint_g:"الحارس: AutoTrading يفضل شغال، فالبوت بيكمل متابعة صفقاته الحالية بالكامل (الاهداف والترايلينج والتأمين والاغلاق الجزئي). وControlBot بيمسح اي امر جديد البوت يحاول يفتحه وقت الايقاف (بعد حوالي ثانية).",
+hint_a:"الايقاف الكامل: بيقفل AutoTrading، فالبوت مش هيقدر يعدل او يقفل او يتابع اي صفقة لحد ما يتفتح تاني (الـ SL/TP اللي على السيرفر بيفضلوا شغالين).",
+stop_now:"ايقاف الان",cancel_em:"الغاء ايقاف الطوارئ",bots_title:"الصفقات والاوامر حسب الماجيك",no_orders:"مفيش صفقات او اوامر معلقة دلوقتي",waiting:"مستني اتصال المنصة",
+manual0:"صفقات يدوية (Magic 0)",bot_magic:"بوت Magic {m}",bot_meta:"{s} · {o} صفقة · {p} معلق",sched_title:"فترات الايقاف المجدولة",no_sched:"مفيش فترات مجدولة",def_name:"ايقاف",
+st_past:"انتهت",st_active:"شغالة الان",st_on:"مفعّلة",st_off:"معطّلة",disable:"تعطيل",enable:"تفعيل",del:"حذف",confirm_del:"حذف الفترة؟",
+new_sched:"فترة ايقاف جديدة",which:"على اي منصات؟",no_plat_yet:"مفيش منصات متصلة لسه",name_opt:"الاسم (اختياري)",name_ph:"مثال: اخبار الفيدرالي",
+p1h:"ساعة",p4h:"4 ساعات",ptom:"لحد بكرة 8 ص",pwk:"الويك اند",from:"من",to:"الى",cairo_tz:"بتوقيت القاهرة",pv_from:"من {t}",pv_to:"الى {t}",dur:"المدة: {x}",h_n:"{n} ساعة",m_n:"{n} دقيقة",
+end_after:"وقت النهاية لازم يكون بعد البداية",save_period:"حفظ الفترة",add_title:"ازاي تضيف منصة جديدة؟",
+add_text:"ركّب ControlBot على الترمنال الجديدة واكتب نفس SecretKey. المنصة بتتعرف على نفسها برقم الحساب، فمش هتتكرر لو غيّرت اي حاجة، وبتظهر هنا لوحدها خلال ثواني. تقدر تسميها او تحذفها برقمك السري.",
+change_key:"تغيير المفتاح السري",err_pick:"اختار منصة واحدة على الاقل",err_dt:"اختار التاريخ والوقت",err_past:"الفترة دي خلصت بالفعل",err_save:"الحفظ فشل، اتأكد من النت وقواعد Firebase",err_conn:"مفيش اتصال بـ Firebase",
+saved:"تم الحفظ",ok:"تأكيد",cancel:"الغاء",am:"ص",pm:"م",settings:"الاعدادات",lang_title:"اللغة",theme_title:"المظهر",close:"تم",
+th_light:"فاتح",th_mint:"اخضر فاتح",th_sand:"كريمي",th_dark:"داكن",
+pin_title:"رقم التأكيد السري",pin_set:"تعيين رقم سري",pin_change:"تغيير الرقم السري",pin_enter:"ادخل الرقم السري",pin_old:"الرقم السري الحالي",pin_new:"رقم سري جديد (4 الى 8 ارقام)",pin_confirm:"اعد ادخال الرقم السري",pin_bad:"رقم سري غلط",pin_mismatch:"الرقمين مش متطابقين",pin_format:"الرقم لازم يكون 4 الى 8 ارقام",pin_saved:"تم حفظ الرقم السري",pin_need:"لازم تعمل رقم سري الاول من الاعدادات",pin_locked:"محاولات غلط كتير، جرب بعد {s} ثانية",go_settings:"فتح الاعدادات",pin_hint:"الرقم ده مطلوب عند تسمية المنصات والبوتات وعند حذف المنصات.",pin_on:"مفعّل",pin_none:"مش متعمل",del_plat:"حذف",confirm_del_plat:"حذف المنصة \"{n}\" بكل فتراتها؟ لو الـ EA لسه شغال عليها هتظهر تاني.",deleted:"تم الحذف",
+news_title:"الاخبار القوية (ForexFactory)",news_on:"مفعّل",news_off:"متوقف",news_cur:"العملات",imp_h:"قوي فقط",imp_m:"قوي ومتوسط",news_pre:"قبل الخبر (دقيقة)",news_post:"بعد الخبر (دقيقة)",news_loaded:"التقويم محمّل: {n} خبر. بيتابع كل الايام تلقائي.",news_not_loaded:"التقويم لسه مش محمّل. اضف https://nfs.faireconomy.media في Allow WebRequest.",news_next:"الاخبار الجاية",news_none:"مفيش اخبار جاية بالفلتر ده",news_hint:"فعّلها وهيوقف البوت حوالين الاخبار القوية تلقائي كل الايام، وهيجيلك اشعار على MetaTrader وعلى التطبيق.",news_window:"ايقاف {a} قبل و{b} بعد",imp_high:"قوي",imp_med:"متوسط",
+accounts:"الحسابات",overview:"نظرة عامة",search_acc:"ابحث عن حساب",no_match:"مفيش نتايج",tab_ctl:"التحكم",tab_trades:"الصفقات",tab_hist:"السجل",tab_info:"الحساب",loading:"جاري التحميل...",open_trades:"صفقات مفتوحة",pending:"اوامر معلقة",lots:"لوت",open_price:"السعر",no_open:"مفيش صفقات مفتوحة او اوامر معلقة",groups:"البوتات (حسب الماجيك)",r_today:"النهارده",r_d7:"7 ايام",r_d30:"30 يوم",r_all:"الكل",report:"تقرير الاداء",curve:"منحنى الرصيد",closed_trades:"الصفقات المقفولة",no_hist:"مفيش صفقات مقفولة في الفترة دي",hist_note:"الحسابات من السجل المحمّل في الترمنال (اخر 500 صفقة). اضبط تبويب Account History على All History عشان يجيب كل الصفقات.",show_more:"عرض المزيد",srv:"السيرفر",acc_no:"رقم الحساب",leverage:"الرافعة",margin:"الهامش المستخدم",free_margin:"الهامش الحر",margin_level:"مستوى الهامش",at_state:"حالة AutoTrading",last_seen:"اخر اتصال",ago:"من {n} ثانية",news_cal:"تقويم الاخبار",data_old:"المنصة مش متصلة، البيانات ممكن تكون قديمة"},
+en:{brand:"Bot Remote",cairo_now:"Cairo now",login:"Sign in",key_label:"Secret key (same as SecretKey in the bot)",key_ph:"At least 16 characters",enter:"Sign in",
+key_err:"Key must be 16+ characters (letters and digits only)",platforms_n:"{n} platforms",none_yet:"No platforms yet",none_hint:"Install ControlBot on your first terminal and it will appear here",
+g_sub:"{on} running · {st} stopped · {off} offline",stop_all:"Stop all",run_all:"Resume all",confirm_stop_all:"Stop all platforms?",
+rename:"Rename",rename_platform:"Platform name",rename_bot:"Bot name",online:"Online",offline:"Offline",at_on:"AutoTrading ON",at_off:"AutoTrading OFF",at_unknown:"AutoTrading ?",
+s_offline:"Platform offline",s_guard:"Guard active (no new orders)",s_stopped:"Stopped",s_running:"Running",reason:"Reason: {r}",resumes:" — resumes {t}",next_stop:"Next stop: {n} — {t}",no_next:"No upcoming stop",
+em_reason:"Emergency stop",balance:"Balance",equity:"Equity",floating:"Floating P/L",mode_a:"Full stop (AutoTrading)",mode_g:"Guard: block new orders",
+hint_g:"Guard: AutoTrading stays ON, so the bot keeps fully managing its current trades (targets, trailing, breakeven, partial closes). ControlBot removes any new order the bot tries to open during the stop (about a second later).",
+hint_a:"Full stop: turns AutoTrading OFF, so the bot cannot modify, close or manage any trade until it is turned back on (server-side SL/TP stay active).",
+stop_now:"Stop now",cancel_em:"Cancel emergency stop",bots_title:"Trades & orders by magic number",no_orders:"No open trades or pending orders",waiting:"Waiting for the platform",
+manual0:"Manual trades (Magic 0)",bot_magic:"Bot Magic {m}",bot_meta:"{s} · {o} open · {p} pending",sched_title:"Scheduled stops",no_sched:"No scheduled stops",def_name:"Stop",
+st_past:"Ended",st_active:"Active now",st_on:"Enabled",st_off:"Disabled",disable:"Disable",enable:"Enable",del:"Delete",confirm_del:"Delete this schedule?",
+new_sched:"New stop period",which:"Which platforms?",no_plat_yet:"No platforms connected yet",name_opt:"Name (optional)",name_ph:"e.g. Fed news",
+p1h:"1 hour",p4h:"4 hours",ptom:"Until tomorrow 8 AM",pwk:"Weekend",from:"From",to:"To",cairo_tz:"Cairo time",pv_from:"From {t}",pv_to:"To {t}",dur:"Duration: {x}",h_n:"{n} h",m_n:"{n} min",
+end_after:"End time must be after the start",save_period:"Save period",add_title:"How to add a new platform?",
+add_text:"Install ControlBot on the new terminal and enter the same SecretKey. A platform is recognized by its account number, so it never duplicates, and it appears here by itself within seconds. You can rename or delete it with your PIN.",
+change_key:"Change secret key",err_pick:"Pick at least one platform",err_dt:"Pick a date and time",err_past:"This period has already ended",err_save:"Save failed. Check your internet and Firebase rules",err_conn:"Can't reach Firebase",
+saved:"Saved",ok:"OK",cancel:"Cancel",am:"AM",pm:"PM",settings:"Settings",lang_title:"Language",theme_title:"Appearance",close:"Done",
+th_light:"Light",th_mint:"Mint",th_sand:"Sand",th_dark:"Dark",
+pin_title:"Confirmation PIN",pin_set:"Set PIN",pin_change:"Change PIN",pin_enter:"Enter your PIN",pin_old:"Current PIN",pin_new:"New PIN (4 to 8 digits)",pin_confirm:"Re-enter the PIN",pin_bad:"Wrong PIN",pin_mismatch:"PINs do not match",pin_format:"PIN must be 4 to 8 digits",pin_saved:"PIN saved",pin_need:"Create a PIN in Settings first",pin_locked:"Too many wrong tries. Try again in {s}s",go_settings:"Open settings",pin_hint:"Required to rename platforms and bots and to delete platforms.",pin_on:"Active",pin_none:"Not set",del_plat:"Delete",confirm_del_plat:"Delete platform \"{n}\" with all its schedules? If its EA is still running it will reappear.",deleted:"Deleted",
+news_title:"Strong news (ForexFactory)",news_on:"On",news_off:"Off",news_cur:"Currencies",imp_h:"High only",imp_m:"High + Medium",news_pre:"Before news (min)",news_post:"After news (min)",news_loaded:"Calendar loaded: {n} events. Tracks every day automatically.",news_not_loaded:"Calendar not loaded yet. Add https://nfs.faireconomy.media to Allow WebRequest.",news_next:"Upcoming news",news_none:"No upcoming news for this filter",news_hint:"Turn it on and the platform stops around strong news automatically, every day, with a push on MetaTrader and in the app.",news_window:"Stop {a} before / {b} after",imp_high:"High",imp_med:"Medium",
+accounts:"Accounts",overview:"Overview",search_acc:"Search accounts",no_match:"No matches",tab_ctl:"Control",tab_trades:"Trades",tab_hist:"History",tab_info:"Account",loading:"Loading...",open_trades:"Open trades",pending:"Pending orders",lots:"lots",open_price:"Price",no_open:"No open trades or pending orders",groups:"Bots (by magic number)",r_today:"Today",r_d7:"7 days",r_d30:"30 days",r_all:"All",report:"Performance report",curve:"Balance curve",closed_trades:"Closed trades",no_hist:"No closed trades in this period",hist_note:"Based on the history loaded in the terminal (last 500 trades). Set the Account History tab to All History to include everything.",show_more:"Show more",srv:"Server",acc_no:"Account",leverage:"Leverage",margin:"Margin",free_margin:"Free margin",margin_level:"Margin level",at_state:"AutoTrading",last_seen:"Last seen",ago:"{n}s ago",news_cal:"News calendar",data_old:"Platform offline, data may be old"}
+};
+let LANG = localStorage.getItem("lang") === "en" ? "en" : "ar";
+const t = (k, v) => { let s = I18N[LANG][k]; if(s == null) s = I18N.ar[k]; if(s == null) s = k; if(v) for(const x in v) s = s.split("{"+x+"}").join(v[x]); return s; };
+const LOC = () => LANG === "ar" ? "ar-EG" : "en-GB";
+
+/* ---------- themes ---------- */
+const THEMES = {light:["#f1f5f9","#ffffff"], mint:["#d1fae5","#ecfdf5"], sand:["#f3e7c4","#fbf5e6"], dark:["#0b1220","#131c2e"]};
+let THEME = localStorage.getItem("theme"); if(!THEMES[THEME]) THEME = "light";
+function applyTheme(){ document.documentElement.setAttribute("data-theme", THEME); $("themeMeta").setAttribute("content", THEMES[THEME][1]); }
+
+/* ---------- top messages: modal + toast ---------- */
+let mResolve = null, toastT = null;
+function openModal(title, nodes, buttons){
+  $("mTitle").textContent = title;
+  const b = $("mBody"); b.innerHTML = ""; nodes.forEach(n => b.append(n));
+  const bt = $("mBtns"); bt.innerHTML = "";
+  buttons.forEach(x => { const e = el("button", x.cls || "", x.label); e.onclick = () => closeModal(x.val); bt.append(e); });
+  $("modal").classList.add("show");
+  return new Promise(r => { mResolve = r; });
+}
+function closeModal(v){ $("modal").classList.remove("show"); const r = mResolve; mResolve = null; if(r) r(v); }
+$("modal").addEventListener("click", e => { if(e.target === $("modal")) closeModal(null); });
+document.addEventListener("keydown", e => { if(e.key === "Escape" && mResolve) closeModal(null); });
+function ask(title, val, pw){
+  const inp = el("input"); inp.value = val || "";
+  if(pw){ inp.type = "password"; inp.setAttribute("inputmode", "numeric"); inp.setAttribute("autocomplete", "off"); }
+  inp.addEventListener("keydown", e => { if(e.key === "Enter") closeModal("ok"); });
+  const p = openModal(title, [inp], [{label:t("cancel"), cls:"ghost", val:null}, {label:t("ok"), val:"ok"}]);
+  setTimeout(() => { inp.focus(); inp.select(); }, 60);
+  return p.then(v => v === null ? null : inp.value.trim());
+}
+function sure(title, danger){
+  return openModal(title, [], [{label:t("cancel"), cls:"ghost", val:false}, {label:t("ok"), cls: danger ? "red" : "", val:true}]).then(v => v === true);
+}
+function toast(msg, kind){
+  const e = $("toast"); e.textContent = msg; e.className = "toast show " + (kind || "");
+  clearTimeout(toastT); toastT = setTimeout(() => { e.className = "toast"; }, 2600);
+}
+/* ---------- confirmation PIN ---------- */
+function sha256(msg){
+  const K = [0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+    0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+    0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+    0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  const bytes = new TextEncoder().encode(msg), l = bytes.length, n = ((l + 9 + 63) >> 6) << 6;
+  const w8 = new Uint8Array(n); w8.set(bytes); w8[l] = 0x80;
+  const dv = new DataView(w8.buffer); dv.setUint32(n-4, (l*8) >>> 0); dv.setUint32(n-8, Math.floor(l*8/4294967296));
+  let H = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  const W = new Uint32Array(64);
+  for(let i=0;i<n;i+=64){
+    for(let j=0;j<16;j++) W[j] = dv.getUint32(i+j*4);
+    for(let j=16;j<64;j++){
+      const x = W[j-15], y = W[j-2];
+      const s0 = ((x>>>7)|(x<<25)) ^ ((x>>>18)|(x<<14)) ^ (x>>>3);
+      const s1 = ((y>>>17)|(y<<15)) ^ ((y>>>19)|(y<<13)) ^ (y>>>10);
+      W[j] = (W[j-16] + s0 + W[j-7] + s1) | 0;
+    }
+    let [a,b,c,d,e,f,g,hh] = H;
+    for(let j=0;j<64;j++){
+      const S1 = ((e>>>6)|(e<<26)) ^ ((e>>>11)|(e<<21)) ^ ((e>>>25)|(e<<7));
+      const ch = (e&f) ^ (~e&g);
+      const t1 = (hh + S1 + ch + K[j] + W[j]) | 0;
+      const S0 = ((a>>>2)|(a<<30)) ^ ((a>>>13)|(a<<19)) ^ ((a>>>22)|(a<<10));
+      const mj = (a&b) ^ (a&c) ^ (b&c);
+      const t2 = (S0 + mj) | 0;
+      hh = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+    }
+    H = [(H[0]+a)|0,(H[1]+b)|0,(H[2]+c)|0,(H[3]+d)|0,(H[4]+e)|0,(H[5]+f)|0,(H[6]+g)|0,(H[7]+hh)|0];
+  }
+  return H.map(x => (x>>>0).toString(16).padStart(8,"0")).join("");
+}
+let PIN = null, pinFails = 0, pinLockUntil = 0;
+async function checkPin(){
+  if(!PIN){
+    openModal(t("pin_need"), [], [{label:t("cancel"), cls:"ghost", val:false}, {label:t("go_settings"), val:true}]).then(v => { if(v) openSettings(); });
+    return false;
+  }
+  if(Date.now() < pinLockUntil){ toast(t("pin_locked",{s:Math.ceil((pinLockUntil-Date.now())/1000)}), "bad"); return false; }
+  const v = await ask(t("pin_enter"), "", true); if(v === null) return false;
+  if(sha256(PIN.s + ":" + v) === PIN.h){ pinFails = 0; return true; }
+  if(++pinFails >= 5){ pinLockUntil = Date.now() + 30000; pinFails = 0; }
+  toast(t("pin_bad"), "bad"); return false;
+}
+async function setPinFlow(){
+  if(PIN && !(await checkPin())) return;
+  const a = await ask(t("pin_new"), "", true); if(a === null) return;
+  if(!/^\d{4,8}$/.test(a)){ toast(t("pin_format"), "bad"); return; }
+  const b = await ask(t("pin_confirm"), "", true); if(b === null) return;
+  if(a !== b){ toast(t("pin_mismatch"), "bad"); return; }
+  const s = Math.random().toString(36).slice(2,10), np = {s, h: sha256(s + ":" + a)};
+  try{
+    const r = await fetch(base()+".json", {method:"PATCH", body: JSON.stringify({pin: np})});
+    if(!r.ok) throw new Error(r.status);
+    PIN = np; toast(t("pin_saved"), "ok"); openSettings();
+  }catch(e){ toast(t("err_save"), "bad"); }
+}
+async function deletePlatform(pid){
+  if(!(await checkPin())) return;
+  if(!(await sure(t("confirm_del_plat",{n:pname(pid)}), true))) return;
+  try{
+    const r = await fetch(base()+".json", {method:"PATCH", body: JSON.stringify({["p/"+pid]: null, ["d/"+pid]: null})});
+    if(!r.ok) throw new Error(r.status);
+    setAt(T, "/" + pid, null, false); derive(); delete DET[pid]; sel.delete(pid); seen.delete(pid); if(view.pid === pid) view = {page:"all", pid:null, tab:"ctl"}; render(); toast(t("deleted"), "ok");
+  }catch(e){ toast(t("err_save"), "bad"); }
+}
+function pname(pid){ const p = P[pid] || {}; return p.label || (p.hb && p.hb.srv ? p.hb.srv + " · " + p.hb.acc : pid); }
+
+function openSettings(){
+  const wrap = el("div");
+  wrap.append(el("div", "hint", t("lang_title")));
+  const r1 = el("div", "pick"); r1.style.marginBottom = "16px";
+  [["ar","العربية"],["en","English"]].forEach(([c, n]) => {
+    const b = el("button", LANG === c ? "on" : "", n);
+    b.onclick = () => { LANG = c; localStorage.setItem("lang", c); applyLang(); openSettings(); };
+    r1.append(b);
+  });
+  wrap.append(r1, el("div", "hint", t("theme_title")));
+  const r2 = el("div", "pick");
+  Object.keys(THEMES).forEach(k => {
+    const b = el("button", THEME === k ? "on" : ""), sw = el("span", "sw"); sw.style.background = THEMES[k][0];
+    b.append(sw, t("th_" + k));
+    b.onclick = () => { THEME = k; localStorage.setItem("theme", k); applyTheme(); openSettings(); };
+    r2.append(b);
+  });
+  wrap.append(r2);
+  const pt = el("div", "hint", t("pin_title")); pt.style.marginTop = "16px";
+  const pr = el("div", "row"); pr.style.marginTop = "6px";
+  pr.append(el("span", "chip " + (PIN ? "ok" : "warn"), PIN ? t("pin_on") : t("pin_none")));
+  const pb = el("button", "ghost sm", PIN ? t("pin_change") : t("pin_set")); pb.onclick = setPinFlow; pr.append(pb);
+  wrap.append(pt, pr, el("div", "hint", t("pin_hint")));
+  openModal(t("settings"), [wrap], [{label:t("close"), val:true}]);
+}
+$("gear").onclick = openSettings;
+
+/* ---------- Cairo time helpers (independent of the phone's time zone) ---------- */
+const TZ = "Africa/Cairo";
+const nowS = () => Math.floor(Date.now()/1000);
+function tzParts(sec){
+  const f = new Intl.DateTimeFormat("en-US",{timeZone:TZ,hourCycle:"h23",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",weekday:"short"});
+  const o = {}; f.formatToParts(new Date(sec*1000)).forEach(p => o[p.type] = p.value); return o;
+}
+function offsetSec(sec){ const p = tzParts(sec); return Date.UTC(+p.year,+p.month-1,+p.day,+p.hour%24,+p.minute,+p.second)/1000 - sec; }
+function cairoToEpoch(y,mo,d,h,mi){ const g = Date.UTC(y,mo-1,d,h,mi)/1000; let t0 = g - offsetSec(g); t0 = g - offsetSec(t0); return t0; }
+const pad = n => String(n).padStart(2,"0");
+const fmt = s => new Date(s*1000).toLocaleString(LOC(),{timeZone:TZ,weekday:"long",day:"numeric",month:"long",hour:"numeric",minute:"2-digit",hour12:true});
+const fmtShort = s => new Date(s*1000).toLocaleString(LOC(),{timeZone:TZ,weekday:"short",day:"numeric",month:"short",hour:"numeric",minute:"2-digit",hour12:true});
+
+/* ---------- date/time form ---------- */
+function fillTime(){
+  const keep = {}; ["fh","fm","th","tm"].forEach(id => keep[id] = $(id).value);
+  for(const id of ["fh","th"]){ const s = $(id); s.innerHTML = ""; for(let h=0;h<24;h++){ const h12 = h%12===0?12:h%12; s.add(new Option(h12+" "+(h<12?t("am"):t("pm")), h)); } }
+  for(const id of ["fm","tm"]){ const s = $(id); if(!s.options.length) for(let m=0;m<60;m+=5) s.add(new Option(":"+pad(m), m)); }
+  for(const id of Object.keys(keep)) if(keep[id] !== "" && keep[id] != null) $(id).value = keep[id];
+}
+function setField(prefix, sec){
+  const p = tzParts(sec);
+  $(prefix+"d").value = p.year+"-"+p.month+"-"+p.day;
+  $(prefix+"h").value = +p.hour%24;
+  $(prefix+"m").value = Math.floor(+p.minute/5)*5;
+}
+function getField(prefix){
+  const v = $(prefix+"d").value; if(!v) return null;
+  const [y,m,d] = v.split("-").map(Number);
+  return cairoToEpoch(y,m,d,+$(prefix+"h").value,+$(prefix+"m").value);
+}
+const ceil5 = s => Math.ceil(s/300)*300;
+function preview(){
+  const f = getField("f"), tt = getField("t");
+  if(!f || !tt){ $("pv").textContent = ""; return; }
+  const dur = tt - f, hrs = Math.floor(dur/3600), mins = Math.round((dur%3600)/60);
+  const x = (hrs ? t("h_n",{n:hrs})+" " : "") + (mins ? t("m_n",{n:mins}) : "");
+  $("pv").innerHTML = "";
+  const s1 = el("small", null, t("cairo_tz")); $("pv").append(s1, t("pv_from",{t:fmt(f)}), document.createElement("br"), t("pv_to",{t:fmt(tt)}));
+  const s2 = el("small", null, dur > 0 ? t("dur",{x}) : t("end_after")); s2.style.marginTop = "6px"; if(dur <= 0) s2.style.color = "var(--badt)";
+  $("pv").append(s2);
+}
+function addDays(y,m,d,n){ const x = new Date(Date.UTC(y,m-1,d+n)); return [x.getUTCFullYear(), x.getUTCMonth()+1, x.getUTCDate()]; }
+function preset(p){
+  const now = nowS(); let f = ceil5(now), tt = 0;
+  if(p==="1h") tt = f+3600;
+  else if(p==="4h") tt = f+4*3600;
+  else if(p==="tom"){ const c = tzParts(now); const [y,m,d] = addDays(+c.year,+c.month,+c.day,1); tt = cairoToEpoch(y,m,d,8,0); }
+  else if(p==="wk"){
+    for(let i=0;i<8;i++){
+      const c = tzParts(now+i*86400);
+      if(c.weekday==="Fri"){
+        const fr = cairoToEpoch(+c.year,+c.month,+c.day,20,0);
+        if(fr>now){ f = fr; const [y,m,d] = addDays(+c.year,+c.month,+c.day,2); tt = cairoToEpoch(y,m,d,22,0); break; }
+      }
+    }
+    if(!tt) tt = f+3600;
+  }
+  setField("f", f); setField("t", tt); preview();
+}
+document.querySelectorAll("[data-p]").forEach(b => b.onclick = () => preset(b.dataset.p));
+["fd","fh","fm","td","th","tm"].forEach(id => $(id).addEventListener("change", preview));
+function resetForm(){ const f = ceil5(nowS()); setField("f", f); setField("t", f+3600); preview(); }
+
+const CURS = ["USD","EUR","GBP","JPY","CHF","CAD","AUD","NZD","CNY"];
+const NEWS_DEF = {on:false, cur:["USD"], imp:"H", pre:15, post:30};
+function newsSection(pid, p, alive){
+  const nw = {...NEWS_DEF, ...(p.news || {})}, hb = p.hb;
+  const sec = el("div", "sec"), head = el("div", "row");
+  head.append(el("div", "lb", t("news_title")));
+  const sw = el("button", nw.on ? "green sm" : "ghost sm", nw.on ? t("news_on") : t("news_off"));
+  sw.onclick = () => saveMany({[pid]: {news: {...nw, on: !nw.on}}});
+  head.append(sw); sec.append(head);
+  if(!nw.on){ sec.append(el("div", "hint", t("news_hint"))); return sec; }
+
+  const cw = el("div", "pick"); cw.style.marginTop = "8px";
+  CURS.forEach(c => {
+    const b = el("button", nw.cur.includes(c) ? "on" : "", c);
+    b.onclick = () => { const cur = nw.cur.includes(c) ? nw.cur.filter(x => x !== c) : [...nw.cur, c]; if(cur.length) saveMany({[pid]: {news: {...nw, cur}}}); };
+    cw.append(b);
+  });
+  sec.append(cw);
+
+  const sg = el("div", "seg"); sg.style.marginTop = "10px";
+  const h1 = el("button", nw.imp === "H" ? "on" : "", t("imp_h")), h2 = el("button", nw.imp === "M" ? "on" : "", t("imp_m"));
+  h1.onclick = () => { if(nw.imp !== "H") saveMany({[pid]: {news: {...nw, imp:"H"}}}); };
+  h2.onclick = () => { if(nw.imp !== "M") saveMany({[pid]: {news: {...nw, imp:"M"}}}); };
+  sg.append(h1, h2); sec.append(sg);
+
+  const mk = (lab, key) => {
+    const w = el("div"); w.append(el("label", null, lab));
+    const i = el("input"); i.type = "number"; i.min = 0; i.max = 240; i.value = nw[key];
+    i.onchange = () => { const v = Math.max(0, Math.min(240, parseInt(i.value) || 0)); saveMany({[pid]: {news: {...nw, [key]: v}}}); };
+    w.append(i); return w;
+  };
+  const g2 = el("div", "g2"); g2.append(mk(t("news_pre"), "pre"), mk(t("news_post"), "post")); sec.append(g2);
+
+  const loaded = alive && hb && hb.ne > 0;
+  const st = el("div", "hint", loaded ? t("news_loaded", {n: hb.ne}) : t("news_not_loaded"));
+  if(!loaded) st.style.color = "var(--warnt)";
+  sec.append(st);
+
+  const lb = el("div", "lb", t("news_next")); lb.style.marginTop = "12px"; sec.append(lb);
+  const now = nowS(), list = (p.nl || []).filter(e => e && e.t + nw.post*60 > now).slice(0, 6);
+  if(!list.length) sec.append(el("div", "empty", t("news_none")));
+  list.forEach(e => {
+    const row = el("div", "bot"), info = el("div");
+    info.append(el("div", "n", e.c + " · " + e.n), el("div", "m", fmtShort(e.t) + " · " + t("news_window", {a: nw.pre, b: nw.post})));
+    row.append(info, el("span", "chip " + (e.i >= 3 ? "bad" : "warn"), e.i >= 3 ? t("imp_high") : t("imp_med")));
+    sec.append(row);
+  });
+  return sec;
+}
+
+/* ---------- state ---------- */
+let T = {}, netErr = false;                         // T = raw /ctl/<key>/p tree
+let view = {page:"all", pid:null, tab:"ctl"};
+const DET = {};                                     // per-account detail cache (open trades, history)
+const det = pid => DET[pid] || (DET[pid] = {ot:null, otAt:0, hist:null, hn:null, histAt:0, show:60, range:"all"});
+const base = () => DB + "/ctl/" + KEY;
+const aliveOf = p => !!p.hb && (nowS() - p.hb.seen) < 60;
+const toArr = x => !x ? [] : Array.isArray(x) ? x.filter(Boolean) : Object.values(x);
+const f2 = v => (Number(v) || 0).toFixed(2);
+const sgn = v => (v >= 0 ? "+" : "") + f2(v);
+const money = (v,cur) => (v<0?"-":"")+Math.abs(v).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})+(cur?" "+cur:"");
+const TYPES = ["Buy","Sell","Buy Limit","Sell Limit","Buy Stop","Sell Stop"];
+function tile(lab, val, cls){ const x = el("div","stat"); x.append(el("span",null,lab), el("b",cls||"",val)); return x; }
+function status(p){
+  if(p.manual) return {p:true, why:t("em_reason"), until:0};
+  const n = nowS();
+  for(const s of Object.values(p.list)) if(s.enabled && s.from<=n && n<s.to) return {p:true, why:s.name, until:s.to};
+  return {p:false, why:"", until:0};
+}
+function stateOf(p){ return !aliveOf(p) ? "off" : status(p).p ? "stop" : "run"; }
+
+function buildCfg(manual, mode, list, news){
+  const now = nowS();
+  const items = Object.values(list||{}).filter(s => s.to > now).sort((a,b)=>a.from-b.from);
+  let nt = "";
+  if(news && news.on && Array.isArray(news.cur) && news.cur.length){
+    const cl = v => Math.max(0, Math.min(240, parseInt(v) || 0));
+    nt = ";N1:" + news.cur.join("+") + ":" + (news.imp==="M"?"M":"H") + ":" + cl(news.pre) + ":" + cl(news.post);
+  }
+  return "M" + (manual?1:0) + (mode==="G"?"G":"A") + items.map(s => ";" + s.from + "," + s.to + "," + (s.enabled?1:0)).join("") + nt;
+}
+
+/* apply a Firebase put/patch (or one of our own writes) to the local tree */
+function setAt(root, path, val, merge){
+  const parts = String(path || "/").split("/").filter(Boolean);
+  if(!parts.length){
+    if(merge && root && val){ for(const k in val){ if(val[k] === null) delete root[k]; else root[k] = val[k]; } return root; }
+    return val || {};
+  }
+  let o = root;
+  for(let i=0;i<parts.length-1;i++){ if(typeof o[parts[i]] !== "object" || o[parts[i]] === null) o[parts[i]] = {}; o = o[parts[i]]; }
+  const last = parts[parts.length-1];
+  if(merge){
+    if(typeof o[last] !== "object" || o[last] === null) o[last] = {};
+    for(const k in (val||{})){ if(val[k] === null) delete o[last][k]; else o[last][k] = val[k]; }
+  } else { if(val === null || val === undefined) delete o[last]; else o[last] = val; }
+  return root;
+}
+function derive(){
+  const np = {};
+  for(const pid of Object.keys(T)){
+    const o = T[pid]; if(!o || typeof o !== "object") continue;
+    np[pid] = {manual: !!o.manual, mode: o.mode==="G"?"G":"A", list: o.list || {}, hb: o.hb || null, names: o.names || {}, label: o.label || "", news: o.news || null, nl: o.nl ? Object.values(o.nl) : []};
+  }
+  P = np;
+}
+
+/* ---------- Firebase (REST) ---------- */
+async function loadAll(){
+  try{
+    const r = await fetch(base()+"/p.json", {cache:"no-store"});
+    if(!r.ok) throw new Error(r.status);
+    T = (await r.json()) || {}; netErr = false; derive(); scheduleRender();
+  }catch(e){ netErr = true; scheduleRender(); }
+}
+async function loadPin(){
+  try{ const r = await fetch(base()+"/pin.json", {cache:"no-store"}); const j = await r.json(); PIN = (j && j.s && j.h) ? j : null; }catch(e){}
+}
+function applyBody(body){ for(const k of Object.keys(body)) setAt(T, "/" + k.slice(2), body[k], false); derive(); }
+async function saveMany(changes){
+  const body = {};
+  for(const pid of Object.keys(changes)){
+    const p = {...P[pid], ...changes[pid]};
+    body["p/"+pid+"/manual"] = p.manual;
+    body["p/"+pid+"/mode"]   = p.mode;
+    body["p/"+pid+"/list"]   = Object.keys(p.list).length ? p.list : null;
+    body["p/"+pid+"/news"]   = p.news || null;
+    body["p/"+pid+"/cfg"]    = buildCfg(p.manual, p.mode, p.list, p.news);
+    if("label" in changes[pid]) body["p/"+pid+"/label"] = p.label || null;
+  }
+  try{
+    const r = await fetch(base()+".json", {method:"PATCH", body: JSON.stringify(body)});
+    if(!r.ok) throw new Error(r.status);
+    applyBody(body); render(); toast(t("saved"), "ok");
+  }catch(e){ toast(t("err_save"), "bad"); }
+}
+async function renameBot(pid, m, name){
+  const body = {["p/"+pid+"/names/"+m]: name || null};
+  try{
+    const r = await fetch(base()+".json", {method:"PATCH", body: JSON.stringify(body)});
+    if(!r.ok) throw new Error(r.status);
+    applyBody(body); render(); toast(t("saved"), "ok");
+  }catch(e){ toast(t("err_save"), "bad"); }
+}
+
+/* ---------- per-account details (fetched only while that account is open) ---------- */
+let detTimer = null;
+function startDetail(){
+  clearInterval(detTimer);
+  if(view.page !== "acc") return;
+  pollDetail(); detTimer = setInterval(pollDetail, 10000);
+}
+async function pollDetail(){
+  if(view.page !== "acc" || document.hidden || !KEY) return;
+  const pid = view.pid, d = det(pid), p = P[pid];
+  try{
+    if(view.tab === "trades"){
+      const r = await fetch(base()+"/d/"+pid+"/ot.json", {cache:"no-store"});
+      if(r.ok){ d.ot = toArr(await r.json()); d.otAt = nowS(); scheduleRender(); }
+    }
+    if(view.tab === "hist"){
+      const hn = p && p.hb ? p.hb.hn : null;
+      if(!d.hist || (hn != null && hn !== d.hn)){
+        const r = await fetch(base()+"/d/"+pid+"/hist.json", {cache:"no-store"});
+        if(r.ok){ d.hist = toArr(await r.json()); d.hn = hn; d.histAt = nowS(); scheduleRender(); }
+      }
+    }
+  }catch(e){}
+}
+
+/* ---------- statistics (same definitions as the MT4 statement) ---------- */
+function calcStats(hist, balNow, since){
+  const all = toArr(hist).map(x => ({...x})).sort((a,b) => (a.e||0) - (b.e||0));
+  const total = all.reduce((s,x) => s + (+x.p||0), 0);
+  let b = (balNow||0) - total; const before = [];
+  all.forEach(x => { before.push(b); b += (+x.p||0); });
+  const first = all.findIndex(x => x.y !== 6 && x.e >= since);
+  const tr = all.filter(x => x.y !== 6 && x.e >= since);
+  const init = first >= 0 ? before[first] : (balNow||0);
+  const S = {n: tr.length, init, curve:[init], gp:0, gl:0, wins:0, losses:0, big:0, small:0, sh:0, shw:0, lo:0, low:0, trades: tr};
+  let bal = init, cur = null; const streaks = [];
+  tr.forEach(x => {
+    const p = +x.p || 0; bal += p; S.curve.push(bal);
+    if(p > 0){ S.gp += p; S.wins++; if(p > S.big) S.big = p; } else if(p < 0){ S.gl += -p; S.losses++; if(p < S.small) S.small = p; }
+    if(x.y === 1){ S.sh++; if(p > 0) S.shw++; } else { S.lo++; if(p > 0) S.low++; }
+    const ty = p > 0 ? "w" : p < 0 ? "l" : "z";
+    if(ty !== "z" && cur && cur.ty === ty){ cur.count++; cur.sum += p; }
+    else { cur = ty === "z" ? null : {ty, count:1, sum:p}; if(cur) streaks.push(cur); }
+  });
+  S.net = S.gp - S.gl;
+  S.pf = S.gl > 0 ? S.gp / S.gl : (S.gp > 0 ? Infinity : 0);
+  S.ep = S.n ? S.net / S.n : 0;
+  let peak = init, minB = init; S.maxDD = 0; S.maxDDpct = 0; S.relPct = 0; S.relMoney = 0;
+  S.curve.forEach(v => {
+    if(v > peak) peak = v; if(v < minB) minB = v;
+    const dd = peak - v, pc = peak > 0 ? dd / peak * 100 : 0;
+    if(dd > S.maxDD){ S.maxDD = dd; S.maxDDpct = pc; }
+    if(pc > S.relPct){ S.relPct = pc; S.relMoney = dd; }
+  });
+  S.abs = Math.max(0, init - minB);
+  const W = streaks.filter(s => s.ty === "w"), L = streaks.filter(s => s.ty === "l");
+  const pick = (arr, f) => arr.reduce((best, s) => (!best || f(s, best)) ? s : best, null) || {count:0, sum:0};
+  S.cw = pick(W, (s,b) => s.count > b.count || (s.count === b.count && s.sum > b.sum));
+  S.cl = pick(L, (s,b) => s.count > b.count || (s.count === b.count && s.sum < b.sum));
+  S.mp = pick(W, (s,b) => s.sum > b.sum);
+  S.ml = pick(L, (s,b) => s.sum < b.sum);
+  S.acw = W.length ? Math.round(W.reduce((a,s) => a + s.count, 0) / W.length) : 0;
+  S.acl = L.length ? Math.round(L.reduce((a,s) => a + s.count, 0) / L.length) : 0;
+  return S;
+}
+function rangeSince(r){
+  const now = nowS();
+  if(r === "today"){ const c = tzParts(now); return cairoToEpoch(+c.year, +c.month, +c.day, 0, 0); }
+  if(r === "d7") return now - 7*86400;
+  if(r === "d30") return now - 30*86400;
+  return 0;
+}
+function curveSvg(pts){
+  const ns = "http://www.w3.org/2000/svg", W = 300, H = 110, pad = 6;
+  const mn = Math.min(...pts), mx = Math.max(...pts), rg = (mx - mn) || 1;
+  const xs = i => pts.length < 2 ? W/2 : pad + i * (W - 2*pad) / (pts.length - 1);
+  const ys = v => H - pad - (v - mn) / rg * (H - 2*pad);
+  const d = pts.map((v,i) => (i ? "L" : "M") + xs(i).toFixed(1) + " " + ys(v).toFixed(1)).join(" ");
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.setAttribute("preserveAspectRatio", "none");
+  svg.style.cssText = "width:100%;height:130px;display:block";
+  const area = document.createElementNS(ns, "path");
+  area.setAttribute("d", d + " L " + (W-pad) + " " + (H-pad) + " L " + pad + " " + (H-pad) + " Z"); area.setAttribute("fill", "var(--onbg)");
+  const line = document.createElementNS(ns, "path");
+  line.setAttribute("d", d); line.setAttribute("fill", "none"); line.setAttribute("stroke", "var(--pri)"); line.setAttribute("stroke-width", "2"); line.setAttribute("vector-effect", "non-scaling-stroke");
+  svg.append(area, line); return svg;
+}
+
+/* ---------- navigation ---------- */
+function closeDrawer(){ $("side").classList.remove("open"); $("scrim").classList.remove("show"); }
+function go(page, pid, tab){
+  view = {page, pid: pid || null, tab: tab || "ctl"};
+  closeDrawer(); window.scrollTo(0, 0); startDetail(); render();
+}
+let rT = null;
+function scheduleRender(){ clearTimeout(rT); rT = setTimeout(render, 120); }
+
+/* ---------- render: sidebar ---------- */
+function renderSide(){
+  const q = ($("sq").value || "").trim().toLowerCase(), list = $("sideList"); list.innerHTML = "";
+  const ov = el("div", "acc" + (view.page === "all" ? " on" : ""));
+  ov.append(el("span", null, "▦"), el("div", "nm", t("overview"))); ov.onclick = () => go("all"); list.append(ov);
+  const pids = Object.keys(P).sort((a,b) => pname(a).toLowerCase() < pname(b).toLowerCase() ? -1 : 1);
+  list.append(el("div", "sl", t("accounts") + " (" + pids.length + ")"));
+  const shown = pids.filter(pid => !q || pname(pid).toLowerCase().includes(q) || pid.includes(q));
+  if(!shown.length) list.append(el("div", "empty", t("no_match")));
+  shown.forEach(pid => {
+    const p = P[pid], s = stateOf(p), hb = p.hb, al = s !== "off";
+    const row = el("div", "acc" + (view.page === "acc" && view.pid === pid ? " on" : ""));
+    const mid = el("div", "mid"); mid.append(el("div", "nm", pname(pid)), el("div", "sb", al && hb.bal != null ? money(hb.bal, hb.cur) : t("offline")));
+    row.append(el("span", "sdot s-" + s), mid);
+    if(al && hb.bal != null){ const fl = hb.eq - hb.bal; row.append(el("div", "pl " + (fl >= 0 ? "pos" : "neg"), sgn(fl))); }
+    row.onclick = () => go("acc", pid, "ctl"); list.append(row);
+  });
+}
+
+/* ---------- render: overview ---------- */
+function overview(){
+  const w = el("div"), pids = Object.keys(P).sort();
+  let on = 0, st = 0, off = 0; const cur = {};
+  pids.forEach(pid => {
+    const p = P[pid], s = stateOf(p);
+    if(s === "off") off++; else if(s === "stop") st++; else on++;
+    if(s !== "off" && p.hb.bal != null){ const c = p.hb.cur || ""; cur[c] = cur[c] || {b:0, e:0}; cur[c].b += p.hb.bal; cur[c].e += p.hb.eq; }
+  });
+  const card = el("div", "card"), row = el("div", "gsum"), left = el("div");
+  left.append(el("div", "big", pids.length ? t("platforms_n", {n: pids.length}) : t("none_yet")),
+              el("div", "sub", netErr ? t("err_conn") : pids.length ? t("g_sub", {on, st, off}) : t("none_hint")));
+  const bt = el("div"); bt.style.cssText = "display:flex;gap:8px";
+  const bs = el("button", "red sm", t("stop_all")), br = el("button", "green sm", t("run_all"));
+  bs.onclick = async () => { const c = {}; Object.keys(P).forEach(pid => c[pid] = {manual:true}); if(Object.keys(c).length && await sure(t("confirm_stop_all"), true)) saveMany(c); };
+  br.onclick = () => { const c = {}; Object.keys(P).forEach(pid => c[pid] = {manual:false}); if(Object.keys(c).length) saveMany(c); };
+  bt.append(bs, br); row.append(left, bt); card.append(row);
+  Object.keys(cur).forEach(c => {
+    const fl = cur[c].e - cur[c].b, g = el("div", "stats");
+    g.append(tile(t("balance") + (c ? " · " + c : ""), money(cur[c].b, c)), tile(t("equity"), money(cur[c].e, c)), tile(t("floating"), money(fl, c), fl >= 0 ? "pos" : "neg"));
+    card.append(g);
+  });
+  w.append(card);
+
+  const lc = el("div", "card"); lc.append(el("p", "h", t("accounts")));
+  if(!pids.length) lc.append(el("div", "empty", t("none_hint")));
+  pids.sort((a,b) => pname(a).toLowerCase() < pname(b).toLowerCase() ? -1 : 1).forEach(pid => {
+    const p = P[pid], s = stateOf(p), hb = p.hb, al = s !== "off";
+    const r = el("div", "bot link"), info = el("div"), nm = el("div", "n");
+    nm.append(el("span", "sdot s-" + s), " ", pname(pid));
+    const stTxt = !al ? t("s_offline") : s === "stop" ? (p.mode === "G" ? t("s_guard") : t("s_stopped")) : t("s_running");
+    info.append(nm, el("div", "m", stTxt + (al && hb.bal != null ? " · " + money(hb.bal, hb.cur) : "")));
+    r.append(info);
+    if(al && hb.bal != null){ const fl = hb.eq - hb.bal; r.append(el("div", "pl " + (fl >= 0 ? "pos" : "neg"), sgn(fl))); }
+    r.onclick = () => go("acc", pid, "ctl"); lc.append(r);
+  });
+  w.append(lc); return w;
+}
+
+/* ---------- render: account page ---------- */
+function accHeader(pid, p){
+  const n = nowS(), st = status(p), hb = p.hb, alive = aliveOf(p), guard = p.mode === "G";
+  const card = el("div", "card plat " + (!alive ? "off" : st.p ? "stop" : "run"));
+  const head = el("div", "row"), left = el("div"); left.append(el("span", "ttl", pname(pid)), " ");
+  const rn = el("button", "edit", t("rename"));
+  rn.onclick = async () => { if(!(await checkPin())) return; const v = await ask(t("rename_platform"), p.label || ""); if(v !== null) saveMany({[pid]: {label: v}}); };
+  const dl = el("button", "edit", t("del_plat")); dl.style.color = "var(--badt)"; dl.onclick = () => deletePlatform(pid);
+  left.append(rn, dl);
+  const chips = el("div", "chips");
+  chips.append(el("span", "chip " + (alive ? "ok" : "bad"), alive ? t("online") : t("offline")));
+  chips.append(el("span", "chip " + (!alive ? "" : hb.at ? "ok" : "warn"), !alive ? t("at_unknown") : hb.at ? t("at_on") : t("at_off")));
+  head.append(left, chips); card.append(head);
+  const state = el("div", "state"); state.append(el("span", "dot"));
+  state.append(el("span", null, !alive ? t("s_offline") : st.p ? (guard ? t("s_guard") : t("s_stopped")) : t("s_running"))); card.append(state);
+  let sub;
+  if(st.p) sub = t("reason", {r: st.why}) + (st.until ? t("resumes", {t: fmt(st.until)}) : "");
+  else { const nx = Object.values(p.list).filter(s => s.enabled && s.from > n).sort((a,b) => a.from - b.from)[0]; sub = nx ? t("next_stop", {n: nx.name || "", t: fmt(nx.from)}) : t("no_next"); }
+  card.append(el("div", "sub", sub));
+  const cur = alive ? hb.cur : "", g = el("div", "stats"), fl = alive && hb.bal != null ? hb.eq - hb.bal : null;
+  g.append(tile(t("balance"), alive && hb.bal != null ? money(hb.bal, cur) : "-"), tile(t("equity"), alive && hb.eq != null ? money(hb.eq, cur) : "-"),
+           tile(t("floating"), fl === null ? "-" : money(fl, cur), fl === null ? "" : fl >= 0 ? "pos" : "neg"));
+  card.append(g); return card;
+}
+function tabsBar(pid){
+  const bar = el("div", "tabs");
+  [["ctl","tab_ctl"],["trades","tab_trades"],["hist","tab_hist"],["info","tab_info"]].forEach(([k, lab]) => {
+    const b = el("button", view.tab === k ? "on" : "", t(lab)); b.onclick = () => { view.tab = k; startDetail(); render(); }; bar.append(b);
+  });
+  return bar;
+}
+function ctlTab(pid, p){
+  const w = el("div"), guard = p.mode === "G", n = nowS();
+  const c1 = el("div", "card"), seg = el("div", "seg"); seg.style.marginTop = "0";
+  const b1 = el("button", guard ? "" : "on", t("mode_a")), b2 = el("button", guard ? "on" : "", t("mode_g"));
+  b1.onclick = () => { if(guard) saveMany({[pid]: {mode: "A"}}); };
+  b2.onclick = () => { if(!guard) saveMany({[pid]: {mode: "G"}}); };
+  seg.append(b1, b2); c1.append(seg, el("div", "hint", guard ? t("hint_g") : t("hint_a")));
+  const mb = el("button", p.manual ? "green" : "red", p.manual ? t("cancel_em") : t("stop_now")); mb.style.cssText = "width:100%;margin-top:12px";
+  mb.onclick = () => saveMany({[pid]: {manual: !p.manual}}); c1.append(mb); w.append(c1);
+
+  const c2 = el("div", "card"), ns = newsSection(pid, p, aliveOf(p)); ns.style.cssText = "border:0;margin:0;padding:0"; c2.append(ns); w.append(c2);
+
+  const c3 = el("div", "card"); c3.append(el("p", "h", t("sched_title")));
+  const items = Object.entries(p.list).map(([id, s]) => ({id, ...s})).sort((a,b) => a.from - b.from);
+  if(!items.length) c3.append(el("div", "empty", t("no_sched")));
+  items.forEach(s => {
+    const active = s.enabled && s.from <= n && n < s.to, past = s.to <= n;
+    const d = el("div", "sch"), r = el("div", "row");
+    r.append(el("span", "t", s.name || t("def_name")), el("span", "chip " + (past ? "" : active ? "warn" : s.enabled ? "ok" : ""), past ? t("st_past") : active ? t("st_active") : s.enabled ? t("st_on") : t("st_off")));
+    const btns = el("div", "btns"), t2 = el("button", "ghost sm", s.enabled ? t("disable") : t("enable")), x = el("button", "ghost sm", t("del")); x.style.color = "var(--badt)";
+    t2.onclick = () => { const L = {...p.list}; L[s.id] = {...L[s.id], enabled: !s.enabled}; saveMany({[pid]: {list: L}}); };
+    x.onclick = async () => { if(await sure(t("confirm_del"), true)){ const L = {...p.list}; delete L[s.id]; saveMany({[pid]: {list: L}}); } };
+    btns.append(t2, x); d.append(r, el("div", "d", fmtShort(s.from) + "  ←  " + fmtShort(s.to)), btns); c3.append(d);
+  });
+  w.append(c3); return w;
+}
+function tradeRow(x, p){
+  const row = el("div", "trd"), top = el("div", "row"), l = el("div"), mk = x.y <= 1;
+  l.append(el("b", null, x.s + " "), el("span", "chip " + (x.y === 0 ? "ok" : x.y === 1 ? "bad" : ""), TYPES[x.y] || String(x.y)), el("span", "m", "  " + f2(x.l) + " " + t("lots")));
+  top.append(l, el("div", "pl " + (!mk ? "" : x.p >= 0 ? "pos" : "neg"), mk ? sgn(x.p) : "—"));
+  const bot = p.names[x.m] || (x.m === 0 ? t("manual0") : "Magic " + x.m);
+  row.append(top, el("div", "m", t("open_price") + " " + x.o + (+x.sl ? " · SL " + x.sl : "") + (+x.tp ? " · TP " + x.tp : "")),
+             el("div", "m", fmtShort(x.t) + " · #" + x.k + " · " + bot + (x.c ? " · " + x.c : "")));
+  return row;
+}
+function tradesTab(pid, p){
+  const d = det(pid), w = el("div"), card = el("div", "card");
+  if(!d.ot){ card.append(el("div", "empty", t("loading"))); w.append(card); return w; }
+  const mk = d.ot.filter(x => x.y <= 1), pe = d.ot.filter(x => x.y > 1), fl = mk.reduce((s,x) => s + (+x.p || 0), 0);
+  const g = el("div", "stats");
+  g.append(tile(t("open_trades"), String(mk.length)), tile(t("pending"), String(pe.length)), tile(t("floating"), sgn(fl), fl >= 0 ? "pos" : "neg"));
+  card.append(g);
+  const age = nowS() - d.otAt; if(!aliveOf(p)) card.append(el("div", "hint", t("data_old")));
+  w.append(card);
+  if(!d.ot.length){ const c = el("div", "card"); c.append(el("div", "empty", t("no_open"))); w.append(c); return w; }
+  const gr = {}; d.ot.forEach(x => { const k = x.m + "|" + x.s; const o = gr[k] = gr[k] || {m: x.m, s: x.s, o: 0, p: 0, pl: 0}; if(x.y <= 1){ o.o++; o.pl += +x.p || 0; } else o.p++; });
+  const gc = el("div", "card"); gc.append(el("p", "h", t("groups")));
+  Object.values(gr).forEach(o => {
+    const row = el("div", "bot"), info = el("div"), nm = p.names[o.m] || (o.m === 0 ? t("manual0") : t("bot_magic", {m: o.m}));
+    const m = el("div", "m", t("bot_meta", {s: o.s, o: o.o, p: o.p}) + " "), e = el("button", "edit", t("rename"));
+    e.onclick = async () => { if(!(await checkPin())) return; const v = await ask(t("rename_bot"), p.names[o.m] || ""); if(v !== null) renameBot(pid, o.m, v); };
+    m.append(e); info.append(el("div", "n", nm), m); row.append(info, el("div", "pl " + (o.pl >= 0 ? "pos" : "neg"), sgn(o.pl))); gc.append(row);
+  });
+  w.append(gc);
+  const lc = el("div", "card"); lc.append(el("p", "h", t("open_trades") + " / " + t("pending")));
+  d.ot.slice().sort((a,b) => (b.t||0) - (a.t||0)).forEach(x => lc.append(tradeRow(x, p)));
+  w.append(lc); return w;
+}
+function histTab(pid, p){
+  const d = det(pid), w = el("div"), rc = el("div", "card"), rg = el("div", "pick");
+  [["today","r_today"],["d7","r_d7"],["d30","r_d30"],["all","r_all"]].forEach(([k, lab]) => {
+    const b = el("button", d.range === k ? "on" : "", t(lab)); b.onclick = () => { d.range = k; d.show = 60; render(); }; rg.append(b);
+  });
+  rc.append(rg); w.append(rc);
+  if(!d.hist){ const c = el("div", "card"); c.append(el("div", "empty", t("loading"))); w.append(c); return w; }
+  const S = calcStats(d.hist, p.hb ? p.hb.bal : 0, rangeSince(d.range));
+  if(!S.n){ const c = el("div", "card"); c.append(el("div", "empty", t("no_hist"))); w.append(c); return w; }
+  const pct = (a, b) => b ? f2(a / b * 100) : "0.00";
+  const rows = [
+    ["Gross Profit", f2(S.gp)], ["Gross Loss", f2(S.gl)], ["Total Net Profit", f2(S.net)], ["Profit Factor", isFinite(S.pf) ? f2(S.pf) : "∞"],
+    ["Expected Payoff", f2(S.ep)], ["Absolute Drawdown", f2(S.abs)], ["Maximal Drawdown", f2(S.maxDD) + " (" + f2(S.maxDDpct) + "%)"], ["Relative Drawdown", f2(S.relPct) + "% (" + f2(S.relMoney) + ")"],
+    ["Total Trades", String(S.n)], ["Short Positions (won %)", S.sh + " (" + pct(S.shw, S.sh) + "%)"], ["Long Positions (won %)", S.lo + " (" + pct(S.low, S.lo) + "%)"],
+    ["Profit Trades (% of total)", S.wins + " (" + pct(S.wins, S.n) + "%)"], ["Loss Trades (% of total)", S.losses + " (" + pct(S.losses, S.n) + "%)"],
+    ["Largest profit trade", f2(S.big)], ["Largest loss trade", f2(S.small)],
+    ["Average profit trade", f2(S.wins ? S.gp / S.wins : 0)], ["Average loss trade", f2(S.losses ? -S.gl / S.losses : 0)],
+    ["Maximum consecutive wins ($)", S.cw.count + " (" + f2(S.cw.sum) + ")"], ["Maximum consecutive losses ($)", S.cl.count + " (" + f2(S.cl.sum) + ")"],
+    ["Maximal consecutive profit (count)", f2(S.mp.sum) + " (" + S.mp.count + ")"], ["Maximal consecutive loss (count)", f2(S.ml.sum) + " (" + S.ml.count + ")"],
+    ["Average consecutive wins", String(S.acw)], ["Average consecutive losses", String(S.acl)]
+  ];
+  const rp = el("div", "card"); rp.append(el("p", "h", t("report") + (p.hb && p.hb.cur ? " · " + p.hb.cur : "")));
+  const grid = el("div", "rep"); rows.forEach(([a, b]) => { const it = el("div", "it"); it.append(el("span", null, a), el("b", null, b)); grid.append(it); });
+  rp.append(grid, el("div", "hint", t("hist_note"))); w.append(rp);
+  const cc = el("div", "card"); cc.append(el("p", "h", t("curve")), curveSvg(S.curve)); w.append(cc);
+  const lc = el("div", "card"); lc.append(el("p", "h", t("closed_trades") + " (" + S.n + ")"));
+  const list = S.trades.slice().reverse();
+  list.slice(0, d.show).forEach(x => {
+    const row = el("div", "trd"), top = el("div", "row"), l = el("div");
+    l.append(el("b", null, x.s + " "), el("span", "chip " + (x.y === 0 ? "ok" : "bad"), TYPES[x.y] || String(x.y)), el("span", "m", "  " + f2(x.l) + " " + t("lots")));
+    top.append(l, el("div", "pl " + (x.p >= 0 ? "pos" : "neg"), sgn(x.p)));
+    row.append(top, el("div", "m", x.o + " → " + x.c + " · #" + x.k), el("div", "m", fmtShort(x.t) + " → " + fmtShort(x.e))); lc.append(row);
+  });
+  if(list.length > d.show){ const m = el("button", "ghost sm", t("show_more")); m.style.cssText = "width:100%;margin-top:10px"; m.onclick = () => { d.show += 60; render(); }; lc.append(m); }
+  w.append(lc); return w;
+}
+function infoTab(pid, p){
+  const w = el("div"), c = el("div", "card"), hb = p.hb, alive = aliveOf(p);
+  const rows = [];
+  if(hb){
+    const lvl = hb.mg > 0 ? f2(hb.eq / hb.mg * 100) + "%" : "-";
+    rows.push([t("srv"), hb.srv || "-"], [t("acc_no"), String(hb.acc || "-")], [t("leverage"), hb.lv ? "1:" + hb.lv : "-"],
+      [t("balance"), money(hb.bal, hb.cur)], [t("equity"), money(hb.eq, hb.cur)], [t("floating"), money(hb.eq - hb.bal, hb.cur)],
+      [t("margin"), money(hb.mg || 0, hb.cur)], [t("free_margin"), money(hb.fm || 0, hb.cur)], [t("margin_level"), lvl],
+      [t("at_state"), hb.at ? t("at_on") : t("at_off")], [t("last_seen"), t("ago", {n: Math.max(0, nowS() - hb.seen)})],
+      [t("news_cal"), hb.ne > 0 ? t("news_loaded", {n: hb.ne}) : "-"]);
+  }
+  if(!rows.length) c.append(el("div", "empty", t("waiting")));
+  rows.forEach(([a, b]) => { const it = el("div", "it"); it.append(el("span", null, a), el("b", null, b)); c.append(it); });
+  if(hb && !alive) c.append(el("div", "hint", t("data_old")));
+  w.append(c); return w;
+}
+function account(pid){
+  const p = P[pid], w = el("div");
+  w.append(accHeader(pid, p), tabsBar(pid));
+  w.append(view.tab === "trades" ? tradesTab(pid, p) : view.tab === "hist" ? histTab(pid, p) : view.tab === "info" ? infoTab(pid, p) : ctlTab(pid, p));
+  return w;
+}
+
+/* ---------- render: main ---------- */
+function renderPick(){
+  const pids = Object.keys(P).sort((a,b) => pname(a).toLowerCase() < pname(b).toLowerCase() ? -1 : 1);
+  pids.forEach(pid => { if(!seen.has(pid)){ seen.add(pid); sel.add(pid); } });
+  [...sel].forEach(pid => { if(!P[pid]) sel.delete(pid); });
+  const pick = $("pick"); pick.innerHTML = "";
+  if(!pids.length) pick.append(el("div", "hint", t("no_plat_yet")));
+  pids.forEach(pid => {
+    const b = el("button", sel.has(pid) ? "on" : "", pname(pid));
+    b.onclick = () => { if(sel.has(pid)) sel.delete(pid); else sel.add(pid); renderPick(); };
+    pick.append(b);
+  });
+}
+function render(){
+  if(!KEY) return;
+  if(view.page === "acc" && !P[view.pid]) view = {page:"all", pid:null, tab:"ctl"};
+  renderSide(); renderPick();
+  $("formWrap").style.display = view.page === "all" ? "block" : "none";
+  const ae = document.activeElement, box = $("dyn");
+  const typing = ae && /^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName || "") && box.contains && box.contains(ae);
+  if(typing) return;
+  box.innerHTML = "";
+  box.append(view.page === "acc" ? account(view.pid) : overview());
+}
+
+$("addBtn").onclick = () => {
+  const f = getField("f"), tt = getField("t");
+  if(!sel.size){ toast(t("err_pick"), "bad"); return; }
+  if(!f || !tt){ toast(t("err_dt"), "bad"); return; }
+  if(tt <= f){ toast(t("end_after"), "bad"); return; }
+  if(tt <= nowS()){ toast(t("err_past"), "bad"); return; }
+  const nm = $("name").value.trim() || t("def_name"), changes = {};
+  sel.forEach(pid => { const id = Math.random().toString(36).slice(2,10), L = {...P[pid].list}; L[id] = {name:nm, from:f, to:tt, enabled:true}; changes[pid] = {list: L}; });
+  $("name").value = ""; saveMany(changes); resetForm();
+};
+$("saveCfg").onclick = () => {
+  const k = $("skey").value.trim();
+  if(k.length < 16 || /[^A-Za-z0-9_-]/.test(k)){ $("serr").textContent = t("key_err"); return; }
+  localStorage.setItem("skey", k); KEY = k; start();
+};
+$("skey").addEventListener("keydown", e => { if(e.key === "Enter") $("saveCfg").click(); });
+$("reset").onclick = e => { e.preventDefault(); stopLive(); if(window.Android && Android.clearKey) Android.clearKey(); localStorage.removeItem("skey"); KEY = ""; T = {}; P = {}; sel.clear(); seen.clear(); view = {page:"all", pid:null, tab:"ctl"}; start(); };
+$("burger").onclick = () => { $("side").classList.add("open"); $("scrim").classList.add("show"); };
+$("scrim").onclick = closeDrawer;
+$("sq").addEventListener("input", renderSide);
+
+function tick(){ $("clock").textContent = new Date().toLocaleString("en-GB",{timeZone:TZ,weekday:"short",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}); }
+setInterval(tick, 1000); tick();
+setInterval(() => { if(KEY) render(); }, 5000);          // refresh ages / online status
+
+function applyLang(){
+  document.documentElement.lang = LANG; document.documentElement.dir = LANG === "ar" ? "rtl" : "ltr";
+  document.querySelectorAll("[data-i18n]").forEach(e => { e.textContent = t(e.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-ph]").forEach(e => { e.placeholder = t(e.dataset.i18nPh); });
+  document.title = t("brand"); fillTime(); preview(); render();
+}
+
+/* ---------- live updates: Firebase streaming (incremental) + slow polling fallback ---------- */
+let es = null, poll = null, retry = null;
+function stopLive(){ if(es){ es.close(); es = null; } clearInterval(poll); clearTimeout(retry); clearInterval(detTimer); }
+function startLive(){
+  stopLive(); loadAll(); loadPin();
+  try{
+    es = new EventSource(base() + "/p.json");
+    const h = merge => e => { try{ const m = JSON.parse(e.data); T = setAt(T, m.path || "/", m.data, merge); netErr = false; derive(); scheduleRender(); }catch(x){} };
+    es.addEventListener("put", h(false));
+    es.addEventListener("patch", h(true));
+    es.onerror = () => { if(es){ es.close(); es = null; } retry = setTimeout(startLive, 3000); };
+  }catch(e){}
+  poll = setInterval(loadAll, 60000);
+  startDetail();
+}
+document.addEventListener("visibilitychange", () => { if(!document.hidden && KEY) startLive(); });
+window.addEventListener("online", () => { if(KEY) startLive(); });
+
+function start(){
+  stopLive();
+  $("setup").style.display = KEY ? "none" : "block";
+  $("main").style.display  = KEY ? "flex" : "none";
+  if(KEY){ resetForm(); startLive(); if(window.Android && Android.setKey) Android.setKey(KEY, DB); }
+}
+applyTheme(); applyLang(); start();
+
+</script>
+</body>
+</html>
